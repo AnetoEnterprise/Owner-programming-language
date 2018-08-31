@@ -244,3 +244,167 @@ owner_variable="MonFichierSorti";
 owner_fermer("MonFichier");
 owner_fichier();
 owner_sortie;
+Exemple complet :
+Notre exemple utilisera le langage cible C. C.à.d. il va recompiler nos codes du langage crée vers le langage C.
+Source Codes :
+/* Debut Définition de flux de notre fichier de sortie final */
+owner_flux="MonFichier";
+/* Fin Définition de flux de notre fichier de sortie final */
+/* Debut Définition des méthodes */
+owner_methode="MethodeDebut",definit;
+owner_methode="MethodeCentrer",nondefinit;
+owner_methode="MethodeFin",definit;
+/* Fin Définition des méthodes */
+/* Debut Définition des séquences */
+owner_sequence="MonIf 2"
+owner_sequence="MonThen 3"
+owner_sequence="MonElse 4"
+owner_sequence="MonEndIf 5"
+owner_sequence="TousCaracteres 6"
+/* Fin Définition des séquences */
+/* Debut Définition de chaine des caractères */
+owner_caracteres="MesCaractes", valeur=tous_caracteres
+owner_caracteres="Commentaires", valeur=owner_commentaires
+/* Fin Définition de chaine des caractères */
+/* Debut Appel de la variable sauvegarder et vérification */
+owner_caracteres_appel="MesCaractes"
+owner_caracteres_appel="Commentaires"
+/* Si on détecte le premier petit guillemet, on débute la récupération des caractères. */
+owner_debut_corps:
+si: "'" alors:
+debut:("MesCaractes");
+finsi;
+/* Tant que nous n'avons pas arrivé au dernier petit guillemet, ne rien faire et on continue la récupération. */
+si: "<MesCaractes>" alors:
+nerienfaire;
+finsi;
+/* Si nous arrivons à détecter les caractères et le dernier petit guillemet, on initialise la récupération. */
+si: "<MesCaractes>"+"'" alors:
+debut:(owner_initialise);
+finsi;
+/* S'il Ya rien à détecter, avant de sauter la ligne on récupère nos caractères. */
+si: "<MesCaractes>"+"." alors:
+owner_recupere_tous;
+/* On retourne les caractères dans la variable qu'on à definit précédemment. */
+retour:"TousCaracteres";
+finsi;
+/* Fin Appel de la variable sauvegarder et vérification */
+/* Debut Vérification d'une ligne commenté */
+/* Si on détecte le <!--, on sait que c'est le debut d'un commentaire. */
+si: "<!--" alors:
+debut:("Commentaires");
+finsi;
+/* Tant que nous n'avons pas arrivé au dernier >, on passe à la ligne suivante. */
+si: "<Commentaires>" alors:
+owner_ligne ++;
+finsi;
+/* Si nous arrivons à détecter les caractères et le dernier >, on initialise les commentaires. */
+si: "<Commentaires>"+">" alors:
+debut:(owner_initialise);
+finsi;
+/* S'il Ya rien à détecter avant de sauter la ligne, on saute directement. */
+si: "<Commentaires>"+"." alors:
+finsi;
+/* Fin Vérification d'une ligne commenté */
+/* Debut ouverture de vérification */
+owner_verification:
+{"If"} {retour: owner_ecoute: "MonIf;"}
+{"Then"} {retour: owner_ecoute: "MonThen;"}
+{"Else"} {retour: owner_ecoute: "MonElse;"}
+{"End If"} {retour: owner_ecoute: "MonEndIf;"}
+owner_verification;
+/* Fin fermeture de vérification */
+/* Debut réponse sur la console */
+owner_reponse:
+owner_message("\n\tErreur a la ligne %d :\n\t'%s' n'est pas reconnu en tant que commande interne ou externe, un programme executable ou un fichier des commandes.\n\tComporte %d lettre(s)\n\t",owner_ligne,owner_code,owner_nombre_caracteres);
+owner_erreur_composeur=activer;
+owner_reponse;
+/* Debut réponse sur la console */
+owner_fin_corps;
+/* Debut définition de variable interne */
+owner_bool "mavariable1=false";
+owner_bool "mavariable2=false";
+/* Fin définition de variable interne */
+/* Debut définition de variable externe */
+owner_bool_externe=owner_ligne;
+owner_bool_externe=owner_erreur_composeur;
+/* Fin définition de variable externe */
+/* Debut table de hachage */
+owner_table:
+owner_table_type=owner_variable;
+owner_table_taille=owner_caracteres;
+owner_table;
+/* Debut table de hachage */
+/* Debut union */
+owner_union:
+owner_union_longeurs=owner_nombre;
+owner_union_caracteres=owner_texte;
+owner_union_methodes=owner_noeud;
+owner_union;
+/* Fin union */
+/* Debut importation des expressions */
+owner_expressions:
+owner_expressions_valeur="MonIf"
+owner_expressions_valeur="MonThen"
+owner_expressions_valeur="MonElse"
+owner_expressions_valeur="MonEndIf"
+owner_expressions_valeur="MesCaractes"
+owner_expressions;
+/* Fin importation des expressions */
+owner_ss:
+/* Debut syntaxes */
+owner_ss_code="MonIf" {
+"mavariable1=true;"
+owner_message(owner_fichier_sorti "MonFichier", valeur "if(");
+}
+owner_ss_code="MonThen" {
+owner_message(owner_fichier_sorti "MonFichier", valeur "){");
+"mavariable2=true;"
+}
+owner_ss_code="MonElse" {owner_message(owner_fichier_sorti "MonFichier", valeur "}else{");}
+owner_ss_code="MonEndIf" {owner_message(owner_fichier_sorti "MonFichier", valeur "}");}
+/* Fin syntaxes */
+/* Debut sémantiques */
+owner_ss_code="MonIf"
++="MesCaractes"
++="MonThen"
+{
+si: "mavariable1==true || mavariable2==true" alors:
+owner_erreur_semantique=desactiver;
+autres:
+owner_erreur_semantique=activer;
+finsi;
+}
+/* Fin sémantiques */
+owner_ss;
+/* Debut définition de(s) fichier(s) et extension(s) de sortie */
+owner_sortie:
+owner_variable="MonFichierEntree";
+"MonFichierEntree", valeur ("strdup(argv[1])");
+owner_variable="MonFichierSorti";
+"MonFichierSorti", valeur ("C:/Resultat.c");
+"MonFichier", valeur owner_ouvrir ("MonFichierSorti");
+owner_fermer("MonFichier");
+owner_fichier();
+owner_sortie;
+/* Fin définition de(s) fichier(s) et extension(s) de sortie */
+Copier les code d’exemple complet puis crée un fichier avec n’importe quel nom et enregistrez-le avec l’extension .own ensuite collé tous les codes dedans.
+Pour tester et avoir un nouveau langage, il suffit de double cliqué votre fichier. Et sur le même répertoire vous verrez votre nouveau langage executable. Vous pouvez le tester jalousement !
+Teste et Utilisation :
+Une fois vous avez sur votre répertoire un nouveau langage crée, il vous faudra donc de le tester. Pour se faire, crée un nouveau fichier et enregistrez-le avec n’importe quel extension. Dans cet exemple nous utiliserons l’extension .ae et rajoutez-le les codes ci-après :
+Essaie.ae :
+<//
+If MaVariable=1 Then
+Message "Valide !"
+Else
+Message "Non valide !"
+End If
+<//
+Puis crée encore un nouveau fichier (Teste.bat) avec l’extension .bat et saisissez les commandes ci-dessous :
+Teste.bat :
+C:/MonLangage.exe < C:/Essaie.ae
+Il vous faudra ensuite de double cliqué sur le fichier Teste.bat et vous verrez l’aperçus de l’écran suivant :
+On voit que tant qu’on n’a pas definit les signes inferieur, supérieur, slash et égale. Notre analyseur composeur affiche les messages des erreurs de chaque signe à chaque ligne.
+A vous maintenant de crée votre propre environnement pour votre langage !
+
+Copyright 2016 By AnetoEnterprise Inc. All Rights Reserved
